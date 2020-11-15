@@ -7,6 +7,7 @@
 {-# LANGUAGE TypeFamilies         #-}
 {-# LANGUAGE TypeOperators        #-}
 {-# LANGUAGE UndecidableInstances #-}
+
 module Schemas.SOP
   ( gSchema
   , HasGenericSchema
@@ -17,11 +18,12 @@ module Schemas.SOP
   )
 where
 
-import           Control.Lens (prism')
-import qualified Data.List.NonEmpty       as NE
+import           Control.Lens       (prism')
+import           Data.Kind          (Type)
+import qualified Data.List.NonEmpty as NE
 import           Data.Profunctor
-import           Data.Text                (Text, pack)
-import           Generics.SOP             as SOP
+import           Data.Text          (Text, pack)
+import           Generics.SOP       as SOP
 import           Schemas.Class
 import           Schemas.Internal
 
@@ -58,7 +60,7 @@ gSchemaNS opts ci =
     where
         mkAlts = hcollapse . hczipWith3 (Proxy :: Proxy (All FieldEncode)) mk (injections @_ @(NP I)) (ejections  @_ @(NP I))
         mk
-            :: forall (xs :: [*])
+            :: forall (xs :: [Type])
              . All FieldEncode xs
             => Injection (NP I) xss xs
             -> Ejection (NP I) xss xs
@@ -70,7 +72,7 @@ gSchemaNS opts ci =
             cons = pack (constructorTagModifier opts (constructorName ci))
 
 gSchemaNP
-    :: forall (xs :: [*])
+    :: forall (xs :: [Type])
      . (All FieldEncode xs)
     => Options
     -> ConstructorInfo xs
@@ -78,7 +80,7 @@ gSchemaNP
 gSchemaNP opts = record . gRecordFields' opts
 
 gRecordFields'
-    :: forall (xs :: [*])
+    :: forall (xs :: [Type])
      . (All FieldEncode xs)
     => Options
     -> ConstructorInfo xs
